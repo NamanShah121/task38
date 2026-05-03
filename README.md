@@ -23,10 +23,6 @@ Frontend runs on `http://localhost:5173`
 
 ## Features
 Register user using username and password
-- Login user and get JWT token
-- Save token in localStorage
-- Access protected route using saved token
-
-## Important note
-
-This project stores users in a simple array, so data will reset whenever the backend restarts.
+Login user and get JWT token
+Save token in localStorage
+Access protected route using saved token
