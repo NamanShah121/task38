@@ -8,8 +8,7 @@ Register a user with username and password
 Login and get JWT token
 Save token in localStorage
 Access protected route using token
-Logout button to clear token
-Password is hashed using bcryptj`
+Logout button to clear token Password is hashed using bcryptjs
 
 # Backend setup
 1. Open terminal in backend

@@ -10,15 +10,7 @@ const PORT = process.env.PORT || 5000;
 const SECRET_KEY = process.env.SECRET_KEY || "mysecretkey";
 const MONGODB_URI = process.env.MONGODB_URI;
 
-// I kept CORS simple here.
-app.use(
-  cors({
-    origin: [
-      "http://localhost:5173",
-      "https://task38-1-xe8e.onrender.com"
-    ]
-  })
-);
+app.use(cors());
 app.use(express.json());
 
 mongoose
@@ -31,35 +23,27 @@ mongoose
   });
 
 const userSchema = new mongoose.Schema({
-  username: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  password: {
-    type: String,
-    required: true
-  }
+  username: String,
+  password: String
 });
 
 const User = mongoose.model("User", userSchema);
 
 function authMiddleware(req, res, next) {
-  const authHeader = req.headers.authorization;
+  const header = req.headers.authorization;
 
-  if (!authHeader) {
+  if (!header) {
     return res.status(401).json({ message: "Token not found" });
   }
 
-  const token = authHeader.split(" ")[1];
+  const token = header.split(" ")[1];
 
   if (!token) {
-    return res.status(401).json({ message: "Invalid token format" });
+    return res.status(401).json({ message: "Invalid token" });
   }
 
   try {
-    const decoded = jwt.verify(token, SECRET_KEY);
-    req.user = decoded;
+    req.user = jwt.verify(token, SECRET_KEY);
     next();
   } catch (error) {
     res.status(401).json({ message: "Invalid token" });
@@ -74,22 +58,19 @@ app.post("/register", async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
-    return res.status(400).json({ message: "Please enter username and password" });
+    return res.status(400).json({ message: "Fill all fields" });
   }
 
   try {
-    // First I check if same username is already saved.
-    const userExists = await User.findOne({ username: username.trim() });
+    const oldUser = await User.findOne({ username: username });
 
-    if (userExists) {
+    if (oldUser) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    // Password should not be stored directly, so I hash it.
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const newUser = new User({
-      username: username.trim(),
+      username: username,
       password: hashedPassword
     });
 
@@ -97,6 +78,7 @@ app.post("/register", async (req, res) => {
 
     res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
+    console.log("register error", error.message);
     res.status(500).json({ message: "Error while registering user" });
   }
 });
@@ -105,22 +87,20 @@ app.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
-    return res.status(400).json({ message: "Please enter username and password" });
+    return res.status(400).json({ message: "Fill all fields" });
   }
 
   try {
-    // Here I find user by username only.
-    const user = await User.findOne({ username: username.trim() });
+    const user = await User.findOne({ username: username });
 
     if (!user) {
-      return res.status(401).json({ message: "Invalid username or password" });
+      return res.status(401).json({ message: "Wrong username or password" });
     }
 
-    // Then I compare entered password with hashed password from DB.
-    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    const matchPassword = await bcrypt.compare(password, user.password);
 
-    if (!isPasswordCorrect) {
-      return res.status(401).json({ message: "Invalid username or password" });
+    if (!matchPassword) {
+      return res.status(401).json({ message: "Wrong username or password" });
     }
 
     const token = jwt.sign({ username: user.username }, SECRET_KEY, {
@@ -129,9 +109,11 @@ app.post("/login", async (req, res) => {
 
     res.json({
       message: "Login successful",
-      token: token
+      token: token,
+      username: user.username
     });
   } catch (error) {
+    console.log("login error", error.message);
     res.status(500).json({ message: "Error while logging in" });
   }
 });

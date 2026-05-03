@@ -1,73 +1,52 @@
 body {
-  margin: 0;
   font-family: Arial, sans-serif;
-  background: #e9ecef;
+  background-color: #eeeeee;
 }
 
 .container {
-  max-width: 500px;
+  width: 400px;
   margin: 40px auto;
-  background: white;
-  padding: 24px;
-  border-radius: 10px;
-  border: 1px solid #d6d6d6;
+  background-color: white;
+  padding: 20px;
+  border: 1px solid #ccc;
 }
 
 h1 {
   text-align: center;
-  margin-top: 0;
-}
-
-.small-text {
-  text-align: center;
-  color: #555;
-  margin-bottom: 20px;
 }
 
 .box {
+  margin-top: 20px;
   margin-bottom: 20px;
-  padding: 14px;
-  border: 1px solid #e1e1e1;
-  border-radius: 8px;
-  background: #fafafa;
-}
-
-h2 {
-  margin-top: 0;
-  margin-bottom: 12px;
 }
 
 form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
 }
 
 input {
+  margin-bottom: 10px;
   padding: 10px;
-  font-size: 15px;
-  border: 1px solid #bdbdbd;
-  border-radius: 6px;
+  border: 1px solid gray;
 }
 
 button {
-  padding: 10px;
-  font-size: 15px;
-  background-color: #1f6feb;
+  margin-right: 5px;
+  margin-top: 8px;
+  padding: 8px;
+  background-color: #0d6efd;
   color: white;
   border: none;
   cursor: pointer;
-  border-radius: 6px;
-  margin-top: 8px;
 }
 
 button:hover {
-  background-color: #1557b0;
+  background-color: #0b5ed7;
 }
 
 .logout-btn {
-  background-color: #666;
-  margin-left: 10px;
+  background-color: #555;
 }
 
 .logout-btn:hover {
@@ -77,10 +56,5 @@ button:hover {
 .message {
   text-align: center;
   font-weight: bold;
-  margin-top: 20px;
-}
-
-.user-line {
-  margin-top: 0;
-  color: #333;
+  color: green;
 }
