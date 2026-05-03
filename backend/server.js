@@ -2,24 +2,23 @@ const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 const SECRET_KEY = process.env.SECRET_KEY || "mysecretkey";
 const MONGODB_URI = process.env.MONGODB_URI;
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://task38-1-xe8e.onrender.com"
-];
-const corsOptions = {
-  origin: allowedOrigins,
-  methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-};
 
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
+// I kept CORS simple here.
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://task38-1-xe8e.onrender.com"
+    ]
+  })
+);
 app.use(express.json());
 
 mongoose
@@ -79,38 +78,48 @@ app.post("/register", async (req, res) => {
   }
 
   try {
-    const userExists = await User.findOne({ username: username });
+    // First I check if same username is already saved.
+    const userExists = await User.findOne({ username: username.trim() });
 
     if (userExists) {
       return res.status(400).json({ message: "User already exists" });
     }
 
+    // Password should not be stored directly, so I hash it.
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const newUser = new User({
-      username: username,
-      password: password
+      username: username.trim(),
+      password: hashedPassword
     });
 
     await newUser.save();
 
     res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
-    res.status(500).json({
-      message: "Error while registering user",
-      error: error.message
-    });
+    res.status(500).json({ message: "Error while registering user" });
   }
 });
 
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
+  if (!username || !password) {
+    return res.status(400).json({ message: "Please enter username and password" });
+  }
+
   try {
-    const user = await User.findOne({
-      username: username,
-      password: password
-    });
+    // Here I find user by username only.
+    const user = await User.findOne({ username: username.trim() });
 
     if (!user) {
+      return res.status(401).json({ message: "Invalid username or password" });
+    }
+
+    // Then I compare entered password with hashed password from DB.
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordCorrect) {
       return res.status(401).json({ message: "Invalid username or password" });
     }
 
@@ -123,10 +132,7 @@ app.post("/login", async (req, res) => {
       token: token
     });
   } catch (error) {
-    res.status(500).json({
-      message: "Error while logging in",
-      error: error.message
-    });
+    res.status(500).json({ message: "Error while logging in" });
   }
 });
 
