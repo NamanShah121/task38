@@ -8,8 +8,18 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const SECRET_KEY = process.env.SECRET_KEY || "mysecretkey";
 const MONGODB_URI = process.env.MONGODB_URI;
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://task38-1-xe8e.onrender.com"
+];
+const corsOptions = {
+  origin: allowedOrigins,
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+};
 
-app.use(cors());
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 app.use(express.json());
 
 mongoose
@@ -84,7 +94,10 @@ app.post("/register", async (req, res) => {
 
     res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Error while registering user" });
+    res.status(500).json({
+      message: "Error while registering user",
+      error: error.message
+    });
   }
 });
 
@@ -110,7 +123,10 @@ app.post("/login", async (req, res) => {
       token: token
     });
   } catch (error) {
-    res.status(500).json({ message: "Error while logging in" });
+    res.status(500).json({
+      message: "Error while logging in",
+      error: error.message
+    });
   }
 });
 
