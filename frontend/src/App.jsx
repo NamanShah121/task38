@@ -14,7 +14,7 @@ function App() {
   const [message, setMessage] = useState("");
   const [protectedMessage, setProtectedMessage] = useState("");
 
-  const backendUrl = "http://localhost:5000";
+  const backendUrl = "https://task38-5t88.onrender.com";
 
   const handleRegisterChange = (e) => {
     setRegisterData({
@@ -159,4 +159,3 @@ function App() {
 }
 
 export default App;
-
